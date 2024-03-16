@@ -28,6 +28,11 @@ public sealed class PDUParserResult
     public int TotalBytesProcessed { get; private init; }
 
     /// <summary>
+    /// The default constructor.
+    /// </summary>
+    public PDUParserResult() { }
+
+    /// <summary>
     /// The property constructor.
     /// </summary>
     /// <param name="erroneousPDUs">The erroneous protocol data units parsed by the parser.</param>
