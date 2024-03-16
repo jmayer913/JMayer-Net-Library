@@ -84,6 +84,12 @@ public sealed class TcpIpClient : IClient
     }
 
     /// <inheritdoc/>
+    public void Dispose()
+    {
+        Disconnect();
+    }
+
+    /// <inheritdoc/>
     public async Task<PDUParserResult> ReceiveAndParseAsync(CancellationToken cancellationToken = default)
     {
         if (!IsConnected)

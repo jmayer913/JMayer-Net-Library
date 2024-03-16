@@ -5,7 +5,7 @@ namespace JMayer.Net;
 /// <summary>
 /// The interface has common properties and methods for a client communicating with a remote server.
 /// </summary>
-public interface IClient
+public interface IClient : IDisposable
 {
     /// <summary>
     /// The property get if the client is connected.
