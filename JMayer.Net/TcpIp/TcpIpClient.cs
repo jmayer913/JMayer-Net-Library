@@ -31,13 +31,13 @@ public sealed class TcpIpClient : IClient
     }
 
     /// <summary>
-    /// The properties constructor.
+    /// The parser constructor.
     /// </summary>
     /// <param name="pduParser">Used to parse any incoming data.</param>
     public TcpIpClient(PDUParser pduParser) => _pduParser = pduParser;
 
     /// <summary>
-    /// The properties constructor.
+    /// The server constructor.
     /// </summary>
     /// <param name="tcpIpClient">Used to communicate with the remote server via TCP/IP.</param>
     /// <param name="pduParser">Used to parse any incoming data.</param>
@@ -90,7 +90,8 @@ public sealed class TcpIpClient : IClient
     }
 
     /// <inheritdoc/>
-    public async Task<PDUParserResult> ReceiveAndParseAsync(CancellationToken cancellationToken = default)
+    /// <exception cref="NotConnectedException">Thrown if the client is not connected.</exception>
+    public async Task<List<PDU>> ReceiveAndParseAsync(CancellationToken cancellationToken = default)
     {
         if (!IsConnected)
         {
@@ -101,34 +102,27 @@ public sealed class TcpIpClient : IClient
         {
             byte[] bytes = new byte[_tcpIpClient.Available];
             _ = await _tcpIpClient.GetStream().ReadAsync(bytes.AsMemory(), cancellationToken);
-            return _pduParser.Parse(bytes);
+            PDUParserResult pduParserResult = _pduParser.Parse(bytes);
+            return pduParserResult.PDUs;
         }
         else
         {
-            return new PDUParserResult();
+            return [];
         }
     }
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">Thrown if the pdu parameter is null.</exception>
+    /// <exception cref="NotConnectedException">Thrown if the client is not connected.</exception>
     public async Task SendAsync(PDU pdu, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pdu);
-
-        if (!IsConnected) 
-        {
-            throw new NotConnectedException();
-        }
-
-        if (_tcpIpClient != null)
-        {
-            byte[] bytes = pdu.ToBytes();
-            await _tcpIpClient.GetStream().WriteAsync(bytes.AsMemory(), cancellationToken);
-        }
+        await SendAsync([pdu], cancellationToken);
     }
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">Thrown if the pdus parameter is null.</exception>
+    /// <exception cref="NotConnectedException">Thrown if the client is not connected.</exception>
     public async Task SendAsync(List<PDU> pdus, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pdus);

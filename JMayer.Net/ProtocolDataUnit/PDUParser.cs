@@ -40,6 +40,12 @@ public abstract class PDUParser
         }
 
         PDUParserResult result = SubClassParse(actualBytes);
+
+        foreach (PDU pdu in result.PDUs)
+        {
+            pdu.Validate();
+        }
+
         SetBuffer(actualBytes, result.TotalBytesProcessed);
 
         return result;

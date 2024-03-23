@@ -6,11 +6,6 @@
 public sealed class PDUParserResult
 {
     /// <summary>
-    /// The property gets the erroneous protocol data units parsed by the parser.
-    /// </summary>
-    public List<ErroneousPDU> ErroneousPDUs { get; private init; } = [];
-
-    /// <summary>
     /// The property gets the protocol data units parsed by the parser.
     /// </summary>
     public List<PDU> PDUs { get; private init; } = [];
@@ -28,19 +23,12 @@ public sealed class PDUParserResult
     public int TotalBytesProcessed { get; private init; }
 
     /// <summary>
-    /// The default constructor.
-    /// </summary>
-    public PDUParserResult() { }
-
-    /// <summary>
     /// The property constructor.
     /// </summary>
-    /// <param name="erroneousPDUs">The erroneous protocol data units parsed by the parser.</param>
     /// <param name="pdus">The protocol data units parsed by the parser.</param>
     /// <param name="totalBytesProcessed">The total bytes processed by the parser.</param>
-    public PDUParserResult(List<ErroneousPDU> erroneousPDUs, List<PDU> pdus, int totalBytesProcessed)
+    public PDUParserResult(List<PDU> pdus, int totalBytesProcessed)
     {
-        ErroneousPDUs = erroneousPDUs;
         PDUs = pdus;
         TotalBytesProcessed = totalBytesProcessed;
     }

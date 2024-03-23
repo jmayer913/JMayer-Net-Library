@@ -35,8 +35,8 @@ public interface IClient : IDisposable
     /// The method receives and parses any PDUs from the remote server.
     /// </summary>
     /// <param name="cancellationToken">A token used for task cancellations.</param>
-    /// <returns>The results of the PDU parsing.</returns>
-    Task<PDUParserResult> ReceiveAndParseAsync(CancellationToken cancellationToken = default);
+    /// <returns>A list of PDUs.</returns>
+    Task<List<PDU>> ReceiveAndParseAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The method sends a PDU to the remote server.
