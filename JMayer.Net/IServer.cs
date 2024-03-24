@@ -8,6 +8,17 @@ namespace JMayer.Net;
 public interface IServer
 {
     /// <summary>
+    /// The property gets/sets how the server determines a remote connection is stale.
+    /// </summary>
+    ConnectionStaleMode ConnectionStaleMode { get; set; }
+
+    /// <summary>
+    /// The property gets/sets the number of seconds of inactivity based on the connection
+    /// stale mode until the connection is considered stale and removed.
+    /// </summary>
+    int ConnectionTimeout { get; set; }
+
+    /// <summary>
     /// The property gets if the server is ready.
     /// </summary>
     bool IsReady { get; }
@@ -18,6 +29,13 @@ public interface IServer
     /// <param name="cancellationToken">A token used for task cancellations.</param>
     /// <returns>The identifier for the remote connection.</returns>
     Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The method determines if any connection is stale so it can be removed.
+    /// </summary>
+    /// <param name="cancellationToken">A token used for task cancellations.</param>
+    /// <returns>A Task object for the async.</returns>
+    Task CheckConnectionHealthAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// The method receives and parses any PDUs from the remote connections.

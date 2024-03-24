@@ -31,6 +31,12 @@ public class TcpIpServer : IServer
     private TcpListener? _tcpIpListener;
 
     /// <inheritdoc/>
+    public ConnectionStaleMode ConnectionStaleMode { get; set; }
+
+    /// <inheritdoc/>
+    public int ConnectionTimeout { get; set; }
+
+    /// <inheritdoc/>
     public bool IsReady
     {
         get => _isReady;
@@ -69,6 +75,26 @@ public class TcpIpServer : IServer
     }
 
     /// <inheritdoc/>
+    public async Task CheckConnectionHealthAsync(CancellationToken cancellationToken)
+    {
+        foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
+        {
+            if (!remoteConnection.Client.IsConnected)
+            {
+#warning Some protocols may require a PDU to be sent before disconnect. Should that be done if the connection is stale?
+
+                try
+                {
+                    remoteConnection.Client.Disconnect();
+                }
+                catch (Exception) { }
+
+                _ = _remoteConnections.TryRemove(remoteConnection.InternalId, out _);
+            }
+        }
+    }
+
+    /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     public async Task<List<RemotePDU>> ReceiveAndParseAsync(CancellationToken cancellationToken)
     {
@@ -77,26 +103,27 @@ public class TcpIpServer : IServer
             throw new ServerNotReadyException();
         }
 
-        List<Task<List<PDU>>> receiveTasks = [];
+        //Because we want to run all tasks at once and the remote connections are needed later to
+        //build the RemotePDU, a tuple will be used to store the remote connection and the task for
+        //receiving and parsing PDUs.
+        List<(RemoteConnection RemoteConnection, Task<List<PDU>> Task)> connectionTuples = [];
 
         foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
         {
-            Task<List<PDU>> receiveTask = remoteConnection.Client.ReceiveAndParseAsync(cancellationToken);
-            receiveTasks.Add(receiveTask);
+            Task<List<PDU>> task = remoteConnection.Client.ReceiveAndParseAsync(cancellationToken);
+            connectionTuples.Add((remoteConnection, task));
         }
 
-        await Task.WhenAll(receiveTasks);
+        await Task.WhenAll(connectionTuples.Select(obj => obj.Task));
 
         List<RemotePDU> remotePDUs = [];
 
-        foreach (Task<List<PDU>> receiveTask in receiveTasks)
+        foreach ((RemoteConnection RemoteConnection, Task<List<PDU>> Task) connectionTuple in connectionTuples)
         {
-            if (receiveTask.Result.Count > 0)
+            if (connectionTuple.Task.Result.Count > 0)
             {
-                //I need the end point and guid but the task won't have this.
-                //I don't want to async one connection at a time.
-                //I could have an intermediate object or maybe I can tuple it.
-                remotePDUs.AddRange(receiveTask.Result.ConvertAll(obj => new RemotePDU("", Guid.Empty, obj)));
+                remotePDUs.AddRange(connectionTuple.Task.Result.ConvertAll(obj => new RemotePDU(connectionTuple.RemoteConnection.Client.RemoteEndPoint, connectionTuple.RemoteConnection.InternalId, obj)));
+                connectionTuple.RemoteConnection.LastSentTimestamp = DateTime.Now;
             }
         }
 
@@ -159,6 +186,7 @@ public class TcpIpServer : IServer
         if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection))
         {
             await remoteConnection.Client.SendAsync(pdus, cancellationToken);
+            remoteConnection.LastSentTimestamp = DateTime.Now;
         }
         else
         {
