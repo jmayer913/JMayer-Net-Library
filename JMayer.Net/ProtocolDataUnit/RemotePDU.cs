@@ -30,12 +30,14 @@ public class RemotePDU
     /// </summary>
     /// <param name="endPoint">The end point of the client who sent the PDU.</param>
     /// <param name="guid">The id of the client who sent the PDU.</param>
-    /// <param name="pDU">The protocol data unit sent by the remote client.</param>
+    /// <param name="pdu">The protocol data unit sent by the remote client.</param>
     /// <exception cref="ArgumentException">Throw if the endPoint parameter is null or empty.</exception>
-    /// /// <exception cref="ArgumentException">Throw if the guid parameter is empty.</exception>
-    public RemotePDU(string endPoint, Guid guid, PDU pDU)
+    /// <exception cref="ArgumentException">Throw if the guid parameter is empty.</exception>
+    /// <exception cref="ArgumentNullException">Throw if the pdu parameter is null.</exception>
+    public RemotePDU(string endPoint, Guid guid, PDU pdu)
     {
         ArgumentException.ThrowIfNullOrEmpty(endPoint);
+        ArgumentNullException.ThrowIfNull(pdu);
 
         if (guid == Guid.Empty)
         {
@@ -44,6 +46,6 @@ public class RemotePDU
 
         EndPoint = endPoint;
         Guid = guid;
-        PDU = pDU;
+        PDU = pdu;
     }
 }

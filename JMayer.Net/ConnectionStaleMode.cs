@@ -12,13 +12,6 @@ public enum ConnectionStaleMode
     None = 0,
 
     /// <summary>
-    /// The last heartbeat sent timestamp will be used to determine if
-    /// the connection is stale; an additional timeout property will be
-    /// used to determine how long.
-    /// </summary>
-    LastHeartbeat,
-
-    /// <summary>
     /// The last received PDU timestamp will be used to determine if
     /// the connection is stale; an additional timeout property will be
     /// used to determine how long.

@@ -31,11 +31,21 @@ public interface IServer
     Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// The method determines if any connection is stale so it can be removed.
+    /// The method disconnects a specific remote connection.
     /// </summary>
-    /// <param name="cancellationToken">A token used for task cancellations.</param>
-    /// <returns>A Task object for the async.</returns>
-    Task CheckConnectionHealthAsync(CancellationToken cancellationToken);
+    /// <param name="guid">The client to disconnect.</param>
+    void Disconnect(Guid guid);
+
+    /// <summary>
+    /// The method disconnects all remote connections.
+    /// </summary>
+    void DisconnectAll();
+
+    /// <summary>
+    /// The method returns the stale remote connections.
+    /// </summary>
+    /// <returns>A list of connection identifiers; empty list if no stale remote connections.</returns>
+    List<Guid> GetStaleRemoteConnections();
 
     /// <summary>
     /// The method receives and parses any PDUs from the remote connections.

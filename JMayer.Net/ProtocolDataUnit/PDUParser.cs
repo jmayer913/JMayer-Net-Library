@@ -1,8 +1,13 @@
-﻿namespace JMayer.Net.ProtocolDataUnit;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace JMayer.Net.ProtocolDataUnit;
 
 /// <summary>
 /// The abstract class defines how a protocol data unit is parsed from the bytes.
 /// </summary>
+/// <remarks>
+/// A subclass will defined how a protocol parses its PDUs.
+/// </remarks>
 public abstract class PDUParser
 {
     /// <summary>
@@ -43,7 +48,8 @@ public abstract class PDUParser
 
         foreach (PDU pdu in result.PDUs)
         {
-            pdu.Validate();
+            List<ValidationResult> validationResults = pdu.Validate();
+            pdu.ValidationResults = validationResults;
         }
 
         SetBuffer(actualBytes, result.TotalBytesProcessed);

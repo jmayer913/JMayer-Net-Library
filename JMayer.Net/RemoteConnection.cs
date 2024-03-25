@@ -1,8 +1,5 @@
 ﻿namespace JMayer.Net;
 
-#warning I need to determine if the Last properties need thread-safety.
-#warning I also need to figure out how the last heartbeat is set. (server or application)
-
 /// <summary>
 /// The class represents a remote client connection to the server.
 /// </summary>
@@ -76,5 +73,10 @@ internal class RemoteConnection
     /// The property constructor.
     /// </summary>
     /// <param name="client">The remote client.</param>
-    public RemoteConnection(IClient client) => Client = client;
+    /// <exception cref="ArgumentNullException">Throw if the client parameter is null.</exception>
+    public RemoteConnection(IClient client) 
+    {
+        ArgumentNullException.ThrowIfNull(client);
+        Client = client; 
+    }
 }

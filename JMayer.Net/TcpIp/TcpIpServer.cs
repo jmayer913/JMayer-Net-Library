@@ -46,7 +46,12 @@ public class TcpIpServer : IServer
     /// The parser constructor.
     /// </summary>
     /// <param name="pduParser">Used to parse any incoming data.</param>
-    public TcpIpServer(PDUParser pduParser) => _pduParser = pduParser;
+    /// <exception cref="ArgumentNullException">Throw if the pduParser parameter is null.</exception>
+    public TcpIpServer(PDUParser pduParser) 
+    {
+        ArgumentNullException.ThrowIfNull(pduParser);
+        _pduParser = pduParser; 
+    }
 
     /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
@@ -75,23 +80,63 @@ public class TcpIpServer : IServer
     }
 
     /// <inheritdoc/>
-    public async Task CheckConnectionHealthAsync(CancellationToken cancellationToken)
+    /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
+    /// <exception cref="RemoteConnectionNotFoundException">Thrown if the Guid provided is not found.</exception>
+    public void Disconnect(Guid guid)
     {
+        if (!IsReady)
+        {
+            throw new ServerNotReadyException();
+        }
+
+        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection))
+        {
+            _ = _remoteConnections.TryRemove(guid, out _);
+            remoteConnection.Client.Disconnect();
+        }
+        else
+        {
+            throw new RemoteConnectionNotFoundException();
+        }
+    }
+
+    /// <inheritdoc/>
+    /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
+    public void DisconnectAll()
+    {
+        if (!IsReady)
+        {
+            throw new ServerNotReadyException();
+        }
+
         foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
         {
-            if (!remoteConnection.Client.IsConnected)
+            try
             {
-#warning Some protocols may require a PDU to be sent before disconnect. Should that be done if the connection is stale?
+                remoteConnection.Client.Disconnect();
+            }
+            catch (Exception) { }
 
-                try
-                {
-                    remoteConnection.Client.Disconnect();
-                }
-                catch (Exception) { }
+            _ = _remoteConnections.TryRemove(remoteConnection.InternalId, out _);
+        }
+    }
 
-                _ = _remoteConnections.TryRemove(remoteConnection.InternalId, out _);
+    /// <inheritdoc/>
+    public List<Guid> GetStaleRemoteConnections()
+    {
+        List<Guid> staleRemoteConnections = [];
+
+        foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
+        {
+            if (!remoteConnection.Client.IsConnected
+                || (ConnectionStaleMode == ConnectionStaleMode.LastReceived && DateTime.Now.Subtract(remoteConnection.LastReceivedTimestamp).TotalSeconds > ConnectionTimeout)
+                || (ConnectionStaleMode == ConnectionStaleMode.LastSent && DateTime.Now.Subtract(remoteConnection.LastSentTimestamp).TotalSeconds > ConnectionTimeout))
+            {
+                staleRemoteConnections.Add(remoteConnection.InternalId);
             }
         }
+
+        return staleRemoteConnections;
     }
 
     /// <inheritdoc/>
@@ -151,15 +196,20 @@ public class TcpIpServer : IServer
             throw new ServerNotReadyException();
         }
 
-        List<Task> sendTasks = [];
+        List<(RemoteConnection RemoteConnection, Task Task)> connectionTuples = [];
 
-        foreach (RemoteConnection connection in _remoteConnections.Values)
+        foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
         {
-            Task sendTask = connection.Client.SendAsync(pdus, cancellationToken);
-            sendTasks.Add(sendTask);
+            Task sendTask = remoteConnection.Client.SendAsync(pdus, cancellationToken);
+            connectionTuples.Add((remoteConnection, sendTask));
         }
 
-        await Task.WhenAll(sendTasks);
+        await Task.WhenAll(connectionTuples.Select(obj => obj.Task));
+
+        foreach ((RemoteConnection RemoteConnection, Task Task) connectionTuple in connectionTuples)
+        {
+            connectionTuple.RemoteConnection.LastSentTimestamp = DateTime.Now;
+        }
     }
 
     /// <inheritdoc/>
@@ -174,6 +224,7 @@ public class TcpIpServer : IServer
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">Thrown if the pdus parameter is null.</exception>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
+    /// <exception cref="RemoteConnectionNotFoundException">Thrown if the Guid provided is not found.</exception>
     public async Task SendToAsync(List<PDU> pdus, Guid guid, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(pdus);
@@ -190,7 +241,7 @@ public class TcpIpServer : IServer
         }
         else
         {
-            //Should I throw an exception?
+            throw new RemoteConnectionNotFoundException();
         }
     }
 
@@ -218,6 +269,9 @@ public class TcpIpServer : IServer
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The listener will be stopped and then any remote connections will be disconnected.
+    /// </remarks>
     public void Stop()
     {
         _tcpIpListener?.Stop();

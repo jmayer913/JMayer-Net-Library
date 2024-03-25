@@ -34,19 +34,27 @@ public sealed class TcpIpClient : IClient
     /// The parser constructor.
     /// </summary>
     /// <param name="pduParser">Used to parse any incoming data.</param>
-    public TcpIpClient(PDUParser pduParser) => _pduParser = pduParser;
+    /// <exception cref="ArgumentNullException">Throw if the pduParser parameter is null.</exception>
+    public TcpIpClient(PDUParser pduParser) 
+    {
+        ArgumentNullException.ThrowIfNull(pduParser);
+        _pduParser = pduParser;
+    }
 
     /// <summary>
     /// The server constructor.
     /// </summary>
     /// <param name="tcpIpClient">Used to communicate with the remote server via TCP/IP.</param>
     /// <param name="pduParser">Used to parse any incoming data.</param>
+    /// <exception cref="ArgumentNullException">Throw if the pduParser parameter is null.</exception>
+    /// <exception cref="ArgumentNullException">Throw if the tcpIpClient parameter is null.</exception>
     /// <remarks>
     /// When the server receives an incoming connection, this constructor will be used.
     /// </remarks>
     internal TcpIpClient(PDUParser pduParser, TcpClient tcpIpClient)
         : this(pduParser)
     {
+        ArgumentNullException.ThrowIfNull(_tcpIpClient);
         _tcpIpClient = tcpIpClient;
     }
 

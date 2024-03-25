@@ -1,6 +1,6 @@
-﻿namespace JMayer.Net.ProtocolDataUnit;
+﻿using System.ComponentModel.DataAnnotations;
 
-#warning This needs to hold a list of reasons why the data is not valid.
+namespace JMayer.Net.ProtocolDataUnit;
 
 /// <summary>
 /// The abstract class represents a protocol data unit sent via network communication.
@@ -17,11 +17,10 @@ public abstract class PDU
     /// <summary>
     /// The property gets if the PDU data is valid.
     /// </summary>
-    /// <remarks>
-    /// The subclass Validate() method will need to set this as true if
-    /// the PDU data isn't valid.
-    /// </remarks>
-    public bool IsValid { get; protected set; }
+    public bool IsValid 
+    {
+        get => ValidationResults.Count == 0;
+    }
 
     /// <summary>
     /// The property gets/sets the number of times the protocl data unit was attempted to be sent.
@@ -34,6 +33,15 @@ public abstract class PDU
     public DateTime Timestamp { get; private init; } = DateTime.Now;
 
     /// <summary>
+    /// The property gets the validation results on the PDU.
+    /// </summary>
+    /// <remarks>
+    /// The base PDUParser class will call Validate() and the results
+    /// returned will be set to this property. That's why the set is internal.
+    /// </remarks>
+    public List<ValidationResult> ValidationResults { get; internal set; } = [];
+
+    /// <summary>
     /// The method returns the byte representation of the protocol data unit.
     /// </summary>
     /// <returns>An array of bytes.</returns>
@@ -42,5 +50,6 @@ public abstract class PDU
     /// <summary>
     /// The method validates if the data in the PDU is correct.
     /// </summary>
-    public abstract void Validate();
+    /// <returns>The result of the validation.</returns>
+    public abstract List<ValidationResult> Validate();
 }
