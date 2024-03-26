@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+#warning I should explore typing the parsing results so the list doesn't need to be cast by the executing application.
+
 namespace JMayer.Net.ProtocolDataUnit;
 
 /// <summary>
@@ -14,6 +16,14 @@ public abstract class PDUParser
     /// The property gets/sets the bytes buffered from a previous parsing attempt.
     /// </summary>
     private byte[] _buffer = [];
+
+    /// <summary>
+    /// The property gets the total bytes buffered by the parser.
+    /// </summary>
+    public int TotalBytesBuffered
+    {
+        get => _buffer.Length;
+    }
 
     /// <summary>
     /// The method attempts to parse the bytes into PDUs.
@@ -41,7 +51,7 @@ public abstract class PDUParser
         {
             actualBytes = new byte[_buffer.Length + bytes.Length];
             Array.Copy(_buffer, 0, actualBytes, 0, _buffer.Length);
-            Array.Copy(bytes, _buffer.Length, actualBytes, 0, bytes.Length);
+            Array.Copy(bytes, 0, actualBytes, _buffer.Length, bytes.Length);
         }
 
         PDUParserResult result = SubClassParse(actualBytes);
@@ -69,7 +79,7 @@ public abstract class PDUParser
     /// </summary>
     /// <param name="bytes">The bytes.</param>
     /// <param name="totalBytesProcessed">The total bytes processed.</param>
-    public void SetBuffer(byte[] bytes, int totalBytesProcessed)
+    private void SetBuffer(byte[] bytes, int totalBytesProcessed)
     {
         if (totalBytesProcessed < bytes.Length)
         {

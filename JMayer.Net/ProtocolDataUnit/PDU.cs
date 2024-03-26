@@ -52,4 +52,16 @@ public abstract class PDU
     /// </summary>
     /// <returns>The result of the validation.</returns>
     public abstract List<ValidationResult> Validate();
+
+    /// <summary>
+    /// The method validates the data annotations on the PDU.
+    /// </summary>
+    /// <param name="dataObject">The data object to validate.</param>
+    /// <returns>The validation results.</returns>
+    protected List<ValidationResult> ValidateDataAnnotations()
+    {
+        List<ValidationResult> validationResults = [];
+        _ = Validator.TryValidateObject(this, new ValidationContext(this), validationResults, true);
+        return validationResults;
+    }
 }
