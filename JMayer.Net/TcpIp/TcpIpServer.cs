@@ -31,6 +31,12 @@ public class TcpIpServer : IServer
     private TcpListener? _tcpIpListener;
 
     /// <inheritdoc/>
+    public int ConnectionCount
+    {
+        get => _remoteConnections.Count;
+    }
+
+    /// <inheritdoc/>
     public ConnectionStaleMode ConnectionStaleMode { get; set; }
 
     /// <inheritdoc/>

@@ -8,6 +8,11 @@ namespace JMayer.Net;
 public interface IServer
 {
     /// <summary>
+    /// The property gets the number of remote connections the server has.
+    /// </summary>
+    int ConnectionCount { get; }
+
+    /// <summary>
     /// The property gets/sets how the server determines a remote connection is stale.
     /// </summary>
     ConnectionStaleMode ConnectionStaleMode { get; set; }
