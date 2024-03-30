@@ -2,10 +2,6 @@
 using System.Text;
 using TestProject.PDU;
 
-#warning I need to add a validation test.
-#warning I need to add exception tests.
-#warning I need to add a parse & buffer and then parse test.
-
 namespace TestProject.Test;
 
 /// <summary>
@@ -14,7 +10,7 @@ namespace TestProject.Test;
 /// <remarks>
 /// The Facts will test the intention of the PDU and PDUParser; PDU and PDUParser
 /// are abstract so the StringPDU and StringPDUParser will be used for the tests.
-/// By intention, I means bytes are passed to the parser and PDUs are returned from
+/// By intention, I mean bytes are passed to the parser and PDUs are returned from
 /// the parser and the parser handles internal buffering and PDU validation.
 /// </remarks>
 public class PDUParserUnitTest
@@ -33,7 +29,7 @@ public class PDUParserUnitTest
     /// The method confirms a partial message will be buffered and then parsed.
     /// </summary>
     [Fact]
-    public void BufferedAndThenParse()
+    public void BufferAndThenParseTwoMessages()
     {
         byte[] bytes = Encoding.ASCII.GetBytes($"{HelloMessage}");
         int totalBytes = bytes.Length;
@@ -63,6 +59,62 @@ public class PDUParserUnitTest
     }
 
     /// <summary>
+    /// The method confirms the first message is parsed and the second message is buffered and then,
+    /// the second message is parsed.
+    /// </summary>
+    [Fact]
+    public void ParseAndBufferAndThenParse()
+    {
+        int totalBytesProcessed = Encoding.ASCII.GetByteCount($"{HelloMessage}{Environment.NewLine}");
+        int totalBytesBuffered = Encoding.ASCII.GetByteCount(HowAreYouMessage);
+        byte[] bytes = Encoding.ASCII.GetBytes($"{HelloMessage}{Environment.NewLine}{HowAreYouMessage}");
+
+        //The first message wil be parsed and the second message will be buffered.
+        StringPDUParser pduParser = new();
+        PDUParserResult pduParserResult = pduParser.Parse(bytes);
+
+        Assert.True
+        (
+            pduParserResult.PDUs.Count == 1 //A single PDU should have been parsed.
+            && pduParserResult.PDUs[0] is StringPDU stringPDU //The PDU will be of StringPDU type.
+            && stringPDU.String == HelloMessage //The PDU should contain a hello message.
+            && pduParserResult.TotalBytesProcessed == totalBytesProcessed //Processed matches first message.
+            && pduParser.TotalBytesBuffered == totalBytesBuffered //Incomplete message was buffered
+        );
+
+        //The second pass will add the new line and the second message will be parsed.
+        totalBytesProcessed = Encoding.ASCII.GetByteCount($"{HowAreYouMessage}{Environment.NewLine}");
+        bytes = Encoding.ASCII.GetBytes($"{Environment.NewLine}");
+
+        pduParserResult = pduParser.Parse(bytes);
+
+        Assert.True
+        (
+            pduParserResult.PDUs.Count == 1 //A PDU should have been parsed.
+            && pduParserResult.PDUs[0] is StringPDU secondStringPDU //The PDU will be of StringPDU type.
+            && secondStringPDU.String == HowAreYouMessage //The PDU should contain a how are you message.
+            && pduParserResult.TotalBytesProcessed == totalBytesProcessed //No message buffering.
+            && pduParser.TotalBytesBuffered == 0 //No message buffering
+        );
+    }
+
+    /// <summary>
+    /// The method confirms an argument exception is thrown when an empty array is passed to PDUParser.Parse().
+    /// </summary>
+    [Fact]
+    public void ParseMethodThrowsArgumentException() => Assert.ThrowsAny<ArgumentException>(() => new StringPDUParser().Parse([]));
+
+    /// <summary>
+    /// The method confirms an argument null exception is thrown when null is passed to PDUParser.Parse().
+    /// </summary>
+    /// <remarks>
+    /// Because the nullable warning is a project option that can be disabled, passing null should be
+    /// checked.
+    /// </remarks>
+    [Fact]
+    public void ParseMethodThrowsArgumentNullException() => Assert.ThrowsAny<ArgumentNullException>(() => new StringPDUParser().Parse(null));
+
+    /// <summary>
     /// The method confirms the parser can parse a single message.
     /// </summary>
     [Fact]
@@ -84,29 +136,6 @@ public class PDUParserUnitTest
     }
 
     /// <summary>
-    /// The method confirms the parser can parse a single message and a second incomplete message will be buffered.
-    /// </summary>
-    [Fact]
-    public void ParseSingleMessageAndBufferSecond()
-    {
-        int totalBytesProcessed = Encoding.ASCII.GetByteCount($"{HelloMessage}{Environment.NewLine}");
-        int totalBytesBuffered = Encoding.ASCII.GetByteCount(HowAreYouMessage);
-        byte[] bytes = Encoding.ASCII.GetBytes($"{HelloMessage}{Environment.NewLine}{HowAreYouMessage}");
-
-        StringPDUParser pduParser = new();
-        PDUParserResult pduParserResult = pduParser.Parse(bytes);
-
-        Assert.True
-        (
-            pduParserResult.PDUs.Count == 1 //A single PDU should have been parsed.
-            && pduParserResult.PDUs[0] is StringPDU stringPDU //The PDU will be of StringPDU type.
-            && stringPDU.String == HelloMessage //The PDU should contain a hello message.
-            && pduParserResult.TotalBytesProcessed == totalBytesProcessed //Processed matches first message.
-            && pduParser.TotalBytesBuffered == totalBytesBuffered //Incomplete message was buffered
-        );
-    }
-
-    /// <summary>
     /// The method confirms the parser can parse two messages.
     /// </summary>
     [Fact]
@@ -124,6 +153,30 @@ public class PDUParserUnitTest
             && pduParserResult.PDUs[1] is StringPDU secondStringPDU //The PDU will be of StringPDU type.
             && firstStringPDU.String == HelloMessage //The first PDU should contain a hello message.
             && secondStringPDU.String == HowAreYouMessage //The second PDU should contain a how are you message.
+            && pduParserResult.TotalBytesProcessed == bytes.Length //No message buffering.
+            && pduParser.TotalBytesBuffered == 0 //No message buffering
+        );
+    }
+
+    /// <summary>
+    /// The method confirms when there's no message (only delimiter), there will be a validation error
+    /// because the message is empty.
+    /// </summary>
+    [Fact]
+    public void ValidateBadMessage()
+    {
+        byte[] bytes = Encoding.ASCII.GetBytes($"{Environment.NewLine}");
+
+        StringPDUParser pduParser = new();
+        PDUParserResult pduParserResult = pduParser.Parse(bytes);
+
+        Assert.True
+        (
+            pduParserResult.PDUs.Count == 1 //A single PDU should have been parsed.
+            && pduParserResult.PDUs[0] is StringPDU stringPDU //The PDU will be of StringPDU type.
+            && stringPDU.String == string.Empty //The PDU will be an empty message.
+            && stringPDU.IsValid == false //An empty message cannot be valid.
+            && stringPDU.ValidationResults.Count == 1 //There's a validation result.
             && pduParserResult.TotalBytesProcessed == bytes.Length //No message buffering.
             && pduParser.TotalBytesBuffered == 0 //No message buffering
         );
