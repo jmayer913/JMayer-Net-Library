@@ -28,7 +28,7 @@ public interface IServer
     /// </summary>
     /// <param name="cancellationToken">A token used for task cancellations.</param>
     /// <returns>The identifier for the remote connection.</returns>
-    Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken);
+    Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The method disconnects a specific remote connection.
@@ -52,7 +52,7 @@ public interface IServer
     /// </summary>
     /// <param name="cancellationToken">A token used for task cancellations.</param>
     /// <returns>The PDUs received from the remote connections.</returns>
-    Task<List<RemotePDU>> ReceiveAndParseAsync(CancellationToken cancellationToken);
+    Task<List<RemotePDU>> ReceiveAndParseAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The method sends a PDU to all clients.
@@ -60,7 +60,7 @@ public interface IServer
     /// <param name="pdu">The PDU to send.</param>
     /// <param name="cancellationToken">A token used for task cancellations.</param>
     /// <returns>A Task object for the async.</returns>
-    Task SendToAllAsync(PDU pdu, CancellationToken cancellationToken);
+    Task SendToAllAsync(PDU pdu, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The method sends PDUs to all clients.
@@ -68,7 +68,7 @@ public interface IServer
     /// <param name="pdus">The PDUs to send.</param>
     /// <param name="cancellationToken">A token used for task cancellations.</param>
     /// <returns>A Task object for the async.</returns>
-    Task SendToAllAsync(List<PDU> pdus, CancellationToken cancellationToken);
+    Task SendToAllAsync(List<PDU> pdus, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The method sends a PDU to a specific client.
@@ -82,7 +82,7 @@ public interface IServer
     /// If the PDU requires a response, this method will be used the Guid from the RemoteClientPDU
     /// will be provided.
     /// </remarks>
-    Task SendToAsync(PDU pdu, Guid guid, CancellationToken cancellationToken);
+    Task SendToAsync(PDU pdu, Guid guid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The method sends PDUs to a specific client.
@@ -96,7 +96,7 @@ public interface IServer
     /// If the PDU requires a response, this method will be used the Guid from the RemoteClientPDU
     /// will be provided.
     /// </remarks>
-    Task SendToAsync(List<PDU> pdus, Guid guid, CancellationToken cancellationToken);
+    Task SendToAsync(List<PDU> pdus, Guid guid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The method starts the server.

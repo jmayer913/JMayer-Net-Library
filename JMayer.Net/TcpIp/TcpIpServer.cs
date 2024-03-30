@@ -55,7 +55,7 @@ public class TcpIpServer : IServer
 
     /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
-    public async Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken)
+    public async Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken = default)
     {
         if (!IsReady)
         {
@@ -141,7 +141,7 @@ public class TcpIpServer : IServer
 
     /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
-    public async Task<List<RemotePDU>> ReceiveAndParseAsync(CancellationToken cancellationToken)
+    public async Task<List<RemotePDU>> ReceiveAndParseAsync(CancellationToken cancellationToken = default)
     {
         if (!IsReady)
         {
@@ -178,7 +178,7 @@ public class TcpIpServer : IServer
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">Thrown if the pdu parameter is null.</exception>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
-    public async Task SendToAllAsync(PDU pdu, CancellationToken cancellationToken)
+    public async Task SendToAllAsync(PDU pdu, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pdu);
         await SendToAllAsync([pdu], cancellationToken);
@@ -187,7 +187,7 @@ public class TcpIpServer : IServer
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">Thrown if the pdus parameter is null.</exception>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
-    public async Task SendToAllAsync(List<PDU> pdus, CancellationToken cancellationToken)
+    public async Task SendToAllAsync(List<PDU> pdus, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pdus);
 
@@ -215,7 +215,7 @@ public class TcpIpServer : IServer
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">Thrown if the pdu parameter is null.</exception>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
-    public async Task SendToAsync(PDU pdu, Guid guid, CancellationToken cancellationToken)
+    public async Task SendToAsync(PDU pdu, Guid guid, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pdu);
         await SendToAsync([pdu], guid, cancellationToken);
@@ -225,7 +225,7 @@ public class TcpIpServer : IServer
     /// <exception cref="ArgumentNullException">Thrown if the pdus parameter is null.</exception>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     /// <exception cref="RemoteConnectionNotFoundException">Thrown if the Guid provided is not found.</exception>
-    public async Task SendToAsync(List<PDU> pdus, Guid guid, CancellationToken cancellationToken)
+    public async Task SendToAsync(List<PDU> pdus, Guid guid, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pdus);
 
