@@ -16,22 +16,12 @@ namespace TestProject.Test;
 public class PDUParserUnitTest
 {
     /// <summary>
-    /// The constant for the "Hello!" message.
-    /// </summary>
-    private const string HelloMessage = "Hello!";
-
-    /// <summary>
-    /// The constant for the "How are you?" message.
-    /// </summary>
-    private const string HowAreYouMessage = "How are you?";
-
-    /// <summary>
     /// The method confirms a partial message will be buffered and then parsed.
     /// </summary>
     [Fact]
     public void BufferAndThenParseTwoMessages()
     {
-        byte[] bytes = Encoding.ASCII.GetBytes($"{HelloMessage}");
+        byte[] bytes = Encoding.ASCII.GetBytes($"{StringPDU.HelloMessage}");
         int totalBytes = bytes.Length;
 
         //Because there's no new line, the first pass will buffer the message.
@@ -41,7 +31,7 @@ public class PDUParserUnitTest
         Assert.Equal(bytes.Length, pduParser.TotalBytesBuffered);
 
         //The second pass will add the new line and the second message and both will be parsed.
-        bytes = Encoding.ASCII.GetBytes($"{Environment.NewLine}{HowAreYouMessage}{Environment.NewLine}");
+        bytes = Encoding.ASCII.GetBytes($"{Environment.NewLine}{StringPDU.HowAreYouMessage}{Environment.NewLine}");
         totalBytes += bytes.Length;
 
         PDUParserResult pduParserResult = pduParser.Parse(bytes);
@@ -51,8 +41,8 @@ public class PDUParserUnitTest
             pduParserResult.PDUs.Count == 2 //Two PDUs should have been parsed.
             && pduParserResult.PDUs[0] is StringPDU firstStringPDU //The PDU will be of StringPDU type.
             && pduParserResult.PDUs[1] is StringPDU secondStringPDU //The PDU will be of StringPDU type.
-            && firstStringPDU.String == HelloMessage //The first PDU should contain a hello message.
-            && secondStringPDU.String == HowAreYouMessage //The second PDU should contain a how are you message.
+            && firstStringPDU.String == StringPDU.HelloMessage //The first PDU should contain a hello message.
+            && secondStringPDU.String == StringPDU.HowAreYouMessage //The second PDU should contain a how are you message.
             && pduParserResult.TotalBytesProcessed == totalBytes //No message buffering.
             && pduParser.TotalBytesBuffered == 0 //No message buffering
         );
@@ -65,9 +55,9 @@ public class PDUParserUnitTest
     [Fact]
     public void ParseAndBufferAndThenParse()
     {
-        int totalBytesProcessed = Encoding.ASCII.GetByteCount($"{HelloMessage}{Environment.NewLine}");
-        int totalBytesBuffered = Encoding.ASCII.GetByteCount(HowAreYouMessage);
-        byte[] bytes = Encoding.ASCII.GetBytes($"{HelloMessage}{Environment.NewLine}{HowAreYouMessage}");
+        int totalBytesProcessed = Encoding.ASCII.GetByteCount($"{StringPDU.HelloMessage}{Environment.NewLine}");
+        int totalBytesBuffered = Encoding.ASCII.GetByteCount(StringPDU.HowAreYouMessage);
+        byte[] bytes = Encoding.ASCII.GetBytes($"{StringPDU.HelloMessage}{Environment.NewLine}{StringPDU.HowAreYouMessage}");
 
         //The first message wil be parsed and the second message will be buffered.
         StringPDUParser pduParser = new();
@@ -77,13 +67,13 @@ public class PDUParserUnitTest
         (
             pduParserResult.PDUs.Count == 1 //A single PDU should have been parsed.
             && pduParserResult.PDUs[0] is StringPDU stringPDU //The PDU will be of StringPDU type.
-            && stringPDU.String == HelloMessage //The PDU should contain a hello message.
+            && stringPDU.String == StringPDU.HelloMessage //The PDU should contain a hello message.
             && pduParserResult.TotalBytesProcessed == totalBytesProcessed //Processed matches first message.
             && pduParser.TotalBytesBuffered == totalBytesBuffered //Incomplete message was buffered
         );
 
         //The second pass will add the new line and the second message will be parsed.
-        totalBytesProcessed = Encoding.ASCII.GetByteCount($"{HowAreYouMessage}{Environment.NewLine}");
+        totalBytesProcessed = Encoding.ASCII.GetByteCount($"{StringPDU.HowAreYouMessage}{Environment.NewLine}");
         bytes = Encoding.ASCII.GetBytes($"{Environment.NewLine}");
 
         pduParserResult = pduParser.Parse(bytes);
@@ -92,7 +82,7 @@ public class PDUParserUnitTest
         (
             pduParserResult.PDUs.Count == 1 //A PDU should have been parsed.
             && pduParserResult.PDUs[0] is StringPDU secondStringPDU //The PDU will be of StringPDU type.
-            && secondStringPDU.String == HowAreYouMessage //The PDU should contain a how are you message.
+            && secondStringPDU.String == StringPDU.HowAreYouMessage //The PDU should contain a how are you message.
             && pduParserResult.TotalBytesProcessed == totalBytesProcessed //No message buffering.
             && pduParser.TotalBytesBuffered == 0 //No message buffering
         );
@@ -120,7 +110,7 @@ public class PDUParserUnitTest
     [Fact]
     public void ParseSingleMessage()
     {
-        byte[] bytes = Encoding.ASCII.GetBytes($"{HelloMessage}{Environment.NewLine}");
+        byte[] bytes = Encoding.ASCII.GetBytes($"{StringPDU.HelloMessage}{Environment.NewLine}");
 
         StringPDUParser pduParser = new();
         PDUParserResult pduParserResult = pduParser.Parse(bytes);
@@ -129,7 +119,7 @@ public class PDUParserUnitTest
         (
             pduParserResult.PDUs.Count == 1 //A single PDU should have been parsed.
             && pduParserResult.PDUs[0] is StringPDU stringPDU //The PDU will be of StringPDU type.
-            && stringPDU.String == HelloMessage //The PDU should contain a hello message.
+            && stringPDU.String == StringPDU.HelloMessage //The PDU should contain a hello message.
             && pduParserResult.TotalBytesProcessed == bytes.Length //No message buffering.
             && pduParser.TotalBytesBuffered == 0 //No message buffering
         );
@@ -141,7 +131,7 @@ public class PDUParserUnitTest
     [Fact]
     public void ParseTwoMessages()
     {
-        byte[] bytes = Encoding.ASCII.GetBytes($"{HelloMessage}{Environment.NewLine}{HowAreYouMessage}{Environment.NewLine}");
+        byte[] bytes = Encoding.ASCII.GetBytes($"{StringPDU.HelloMessage}{Environment.NewLine}{StringPDU.HowAreYouMessage}{Environment.NewLine}");
 
         StringPDUParser pduParser = new();
         PDUParserResult pduParserResult = pduParser.Parse(bytes);
@@ -151,8 +141,8 @@ public class PDUParserUnitTest
             pduParserResult.PDUs.Count == 2 //Two PDUs should have been parsed.
             && pduParserResult.PDUs[0] is StringPDU firstStringPDU //The PDU will be of StringPDU type.
             && pduParserResult.PDUs[1] is StringPDU secondStringPDU //The PDU will be of StringPDU type.
-            && firstStringPDU.String == HelloMessage //The first PDU should contain a hello message.
-            && secondStringPDU.String == HowAreYouMessage //The second PDU should contain a how are you message.
+            && firstStringPDU.String == StringPDU.HelloMessage //The first PDU should contain a hello message.
+            && secondStringPDU.String == StringPDU.HowAreYouMessage //The second PDU should contain a how are you message.
             && pduParserResult.TotalBytesProcessed == bytes.Length //No message buffering.
             && pduParser.TotalBytesBuffered == 0 //No message buffering
         );

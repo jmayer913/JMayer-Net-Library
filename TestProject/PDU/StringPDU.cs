@@ -9,6 +9,21 @@ namespace TestProject.PDU;
 internal class StringPDU : JMayer.Net.ProtocolDataUnit.PDU
 {
     /// <summary>
+    /// The constant for the "Hello!" message.
+    /// </summary>
+    public const string HelloMessage = "Hello!";
+
+    /// <summary>
+    /// The constant for the "How are you?" message.
+    /// </summary>
+    public const string HowAreYouMessage = "How are you?";
+
+    /// <summary>
+    /// The constant for the "I am doing good?" message.
+    /// </summary>
+    public const string IAmDoingGoodMessage = "I am doing good.";
+
+    /// <summary>
     /// The property gets/sets the string for the protocol data unit.
     /// </summary>
     [Required]
