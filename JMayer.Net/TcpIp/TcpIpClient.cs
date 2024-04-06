@@ -54,7 +54,7 @@ public sealed class TcpIpClient : IClient
     internal TcpIpClient(PDUParser pduParser, TcpClient tcpIpClient)
         : this(pduParser)
     {
-        ArgumentNullException.ThrowIfNull(_tcpIpClient);
+        ArgumentNullException.ThrowIfNull(tcpIpClient);
         _tcpIpClient = tcpIpClient;
     }
 
