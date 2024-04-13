@@ -3,7 +3,7 @@
 /// <summary>
 /// The class represents the client not being connected when an action is taken which requires a connection.
 /// </summary>
-public class NotConnectedException : Exception
+public sealed class NotConnectedException : Exception
 {
     /// <inheritdoc/>
     public NotConnectedException() { }

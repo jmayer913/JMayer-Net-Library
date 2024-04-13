@@ -8,7 +8,7 @@ namespace JMayer.Net.TcpIp;
 /// <summary>
 /// The class manages the remote connections to the server.
 /// </summary>
-public class TcpIpServer : IServer
+public sealed class TcpIpServer : IServer
 {
     /// <summary>
     /// Used to indicate if the server is ready.
@@ -128,8 +128,14 @@ public class TcpIpServer : IServer
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     public List<Guid> GetStaleRemoteConnections()
     {
+        if (!IsReady)
+        {
+            throw new ServerNotReadyException();
+        }
+
         List<Guid> staleRemoteConnections = [];
 
         foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
@@ -174,7 +180,7 @@ public class TcpIpServer : IServer
             if (connectionTuple.Task.Result.Count > 0)
             {
                 remotePDUs.AddRange(connectionTuple.Task.Result.ConvertAll(obj => new RemotePDU(connectionTuple.RemoteConnection.Client.RemoteEndPoint, connectionTuple.RemoteConnection.InternalId, obj)));
-                connectionTuple.RemoteConnection.LastSentTimestamp = DateTime.Now;
+                connectionTuple.RemoteConnection.LastReceivedTimestamp = DateTime.Now;
             }
         }
 
@@ -283,16 +289,7 @@ public class TcpIpServer : IServer
         _tcpIpListener?.Stop();
         _tcpIpListener = null;
 
-        foreach (RemoteConnection connection in _remoteConnections.Values)
-        {
-            try
-            {
-                connection.Client.Disconnect();
-            }
-            catch (Exception) { }
-        }
-
-        _remoteConnections.Clear();
+        DisconnectAll();
         _isReady = false;
     }
 }

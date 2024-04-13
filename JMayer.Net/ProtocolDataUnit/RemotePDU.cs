@@ -8,7 +8,7 @@
 /// from the server. The application will then process the data however it needs
 /// to and if necessary, send a response back to the client using the guid.
 /// </remarks>
-public class RemotePDU
+public sealed class RemotePDU
 {
     /// <summary>
     /// The property gets the end point of the client who sent the PDU.

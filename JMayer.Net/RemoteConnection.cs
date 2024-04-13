@@ -3,7 +3,7 @@
 /// <summary>
 /// The class represents a remote client connection to the server.
 /// </summary>
-internal class RemoteConnection
+internal sealed class RemoteConnection
 {
     /// <summary>
     /// The property gets the remote client.
@@ -14,24 +14,6 @@ internal class RemoteConnection
     /// The property gets the internal id for the remote connection.
     /// </summary>
     public Guid InternalId { get; private init; } = Guid.NewGuid();
-
-    /// <summary>
-    /// When was a heartbeat last sent.
-    /// </summary>
-    /// <remarks>
-    /// Multiple threads can potentially access the variable so 
-    /// access must be interlocked in the LastHeartbeatTimestamp property.
-    /// </remarks>
-    private long _lastHeartbeatTimestamp;
-
-    /// <summary>
-    /// The property gets/sets when the last heartbeat was sent.
-    /// </summary>
-    public DateTime LastHeartbeatTimestamp
-    {
-        get => new(Interlocked.Read(ref _lastHeartbeatTimestamp));
-        set => Interlocked.Exchange(ref _lastHeartbeatTimestamp, value.Ticks);
-    }
 
     /// <summary>
     /// When was the last message received?

@@ -3,7 +3,7 @@
 /// <summary>
 /// The class represents the server is not ready meaning it has not been started.
 /// </summary>
-public class ServerNotReadyException : Exception
+public sealed class ServerNotReadyException : Exception
 {
     /// <inheritdoc/>
     public ServerNotReadyException() { }

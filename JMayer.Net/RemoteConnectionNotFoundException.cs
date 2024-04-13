@@ -3,7 +3,7 @@
 /// <summary>
 /// The class represents a remote connection was not found when searching for specific one established with the server.
 /// </summary>
-public class RemoteConnectionNotFoundException : Exception
+public sealed class RemoteConnectionNotFoundException : Exception
 {
     /// <inheritdoc/>
     public RemoteConnectionNotFoundException() { }
