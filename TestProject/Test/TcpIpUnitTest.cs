@@ -3,8 +3,6 @@ using JMayer.Net.ProtocolDataUnit;
 using JMayer.Net.TcpIp;
 using TestProject.PDU;
 
-#warning This fails when all tests are ran. I'll need to create a class server object and a common setup method which the tests will call.
-
 namespace TestProject.Test;
 
 /// <summary>
@@ -22,19 +20,14 @@ public class TcpIpUnitTest
     private const string LocalIpAddress = "127.0.0.1";
 
     /// <summary>
-    /// The constant for the port.
-    /// </summary>
-    private const int Port = 44444;
-
-    /// <summary>
     /// The method confirms an argument exception is thrown when a null or empty name or IP address or
     /// when an invalid port is passed to the TcpIpClient.ConnectionAsync().
     /// </summary>
     [Fact]
     public void ClientConnectMethodThrowsArgumentException()
     {
-        Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(null, Port));
-        Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(string.Empty, Port));
+        Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(null, PortManager.BasePort));
+        Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(string.Empty, PortManager.BasePort));
         Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(LocalIpAddress, 0));
     }
 
@@ -77,10 +70,11 @@ public class TcpIpUnitTest
         TcpIpServer server = new(new StringPDUParser());
         TcpIpClient client = new(new StringPDUParser());
 
-        server.Start(Port);
+        int port = PortManager.Instance.GetNextAvailablePort();
+        server.Start(port);
         LaunchServerAcceptConnectionsThread(server);
 
-        await client.ConnectAsync(LocalIpAddress, Port);
+        await client.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(1000);
 
         Assert.True(client.IsConnected);
@@ -107,10 +101,11 @@ public class TcpIpUnitTest
         };
         TcpIpClient client = new(new StringPDUParser());
 
-        server.Start(Port);
+        int port = PortManager.Instance.GetNextAvailablePort();
+        server.Start(port);
         LaunchServerAcceptConnectionsThread(server);
 
-        await client.ConnectAsync(LocalIpAddress, Port);
+        await client.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(1000);
 
         for (int index = 0; index < 20; index++)
@@ -127,7 +122,7 @@ public class TcpIpUnitTest
         server.DisconnectAll();
         server.ConnectionStaleMode = ConnectionStaleMode.LastSent;
 
-        await client.ConnectAsync(LocalIpAddress, Port);
+        await client.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(1000);
 
         for (int index = 0; index < 20; index++)
@@ -156,10 +151,11 @@ public class TcpIpUnitTest
         };
         TcpIpClient client = new(new StringPDUParser());
 
-        server.Start(Port);
+        int port = PortManager.Instance.GetNextAvailablePort();
+        server.Start(port);
         LaunchServerAcceptConnectionsThread(server);
 
-        await client.ConnectAsync(LocalIpAddress, Port);
+        await client.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(2000);
 
         List<Guid> guids = server.GetStaleRemoteConnections();
@@ -169,7 +165,7 @@ public class TcpIpUnitTest
         server.DisconnectAll();
         server.ConnectionStaleMode = ConnectionStaleMode.LastSent;
 
-        await client.ConnectAsync(LocalIpAddress, Port);
+        await client.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(2000);
 
         guids = server.GetStaleRemoteConnections();
@@ -211,11 +207,12 @@ public class TcpIpUnitTest
         TcpIpClient client1 = new(new StringPDUParser());
         TcpIpClient client2 = new(new StringPDUParser());
 
-        server.Start(Port);
+        int port = PortManager.Instance.GetNextAvailablePort();
+        server.Start(port);
         LaunchServerAcceptConnectionsThread(server);
 
-        await client1.ConnectAsync(LocalIpAddress, Port);
-        await client2.ConnectAsync(LocalIpAddress, Port);
+        await client1.ConnectAsync(LocalIpAddress, port);
+        await client2.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(2000);
 
         await server.SendToAllAsync(new StringPDU() { String = $"{StringPDU.HelloMessage}{Environment.NewLine}" });
@@ -254,10 +251,11 @@ public class TcpIpUnitTest
         TcpIpServer server = new(new StringPDUParser());
         TcpIpClient client = new(new StringPDUParser());
 
-        server.Start(Port);
+        int port = PortManager.Instance.GetNextAvailablePort();
+        server.Start(port);
         LaunchServerAcceptConnectionsThread(server);
 
-        await client.ConnectAsync(LocalIpAddress, Port);
+        await client.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(1000);
 
         await client.SendAsync(new StringPDU() { String = $"{StringPDU.HelloMessage}{Environment.NewLine}" });
@@ -291,11 +289,12 @@ public class TcpIpUnitTest
         TcpIpClient client1 = new(new StringPDUParser());
         TcpIpClient client2 = new(new StringPDUParser());
 
-        server.Start(Port);
+        int port = PortManager.Instance.GetNextAvailablePort();
+        server.Start(port);
         LaunchServerAcceptConnectionsThread(server);
 
-        await client1.ConnectAsync(LocalIpAddress, Port);
-        await client2.ConnectAsync(LocalIpAddress, Port);
+        await client1.ConnectAsync(LocalIpAddress, port);
+        await client2.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(2000);
 
         await server.SendToAllAsync([new StringPDU() { String = $"{StringPDU.HelloMessage}{Environment.NewLine}" }, new StringPDU() { String = $"{StringPDU.HowAreYouMessage}{Environment.NewLine}" }]);
@@ -334,10 +333,11 @@ public class TcpIpUnitTest
         TcpIpServer server = new(new StringPDUParser());
         TcpIpClient client = new(new StringPDUParser());
 
-        server.Start(Port);
+        int port = PortManager.Instance.GetNextAvailablePort();
+        server.Start(port);
         LaunchServerAcceptConnectionsThread(server);
 
-        await client.ConnectAsync(LocalIpAddress, Port);
+        await client.ConnectAsync(LocalIpAddress, port);
         await Task.Delay(1000);
 
         await client.SendAsync([new StringPDU() { String = $"{StringPDU.HelloMessage}{Environment.NewLine}" }, new StringPDU() { String = $"{StringPDU.HowAreYouMessage}{Environment.NewLine}" }]);
@@ -381,7 +381,7 @@ public class TcpIpUnitTest
     public void ServerDisconnectMethodThrowsRemoteConnectionNotFoundException()
     {
         TcpIpServer server = new(new StringPDUParser());
-        server.Start(Port);
+        server.Start(PortManager.Instance.GetNextAvailablePort());
         Assert.ThrowsAny<RemoteConnectionNotFoundException>(() => server.Disconnect(Guid.NewGuid()));
         server.Stop();
     }
@@ -437,7 +437,7 @@ public class TcpIpUnitTest
     public void ServerSendToMethodThrowsRemoteConnectionNotFoundException()
     {
         TcpIpServer server = new(new StringPDUParser());
-        server.Start(Port);
+        server.Start(PortManager.Instance.GetNextAvailablePort());
         Assert.ThrowsAnyAsync<RemoteConnectionNotFoundException>(() => server.SendToAsync(new StringPDU(), Guid.NewGuid()));
         server.Stop();
     }
