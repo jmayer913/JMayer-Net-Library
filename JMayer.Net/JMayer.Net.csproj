@@ -4,6 +4,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<Authors>jmayer913</Authors>
+    <Company>jmayer913</Company>
+    <PackageDescription>Package contains network communication (TCP/IP Only).</PackageDescription>
+    <RepositoryUrl>https://github.com/jmayer913/JMayer-Net-Library</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
