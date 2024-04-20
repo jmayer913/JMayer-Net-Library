@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-#warning I should explore typing the parsing results so the list doesn't need to be cast by the executing application.
-
 namespace JMayer.Net.ProtocolDataUnit;
 
 /// <summary>
