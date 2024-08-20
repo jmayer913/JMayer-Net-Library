@@ -128,6 +128,32 @@ public sealed class TcpIpServer : IServer
     }
 
     /// <inheritdoc/>
+    public void Dispose()
+    {
+        Stop();
+    }
+
+    /// <inheritdoc/>
+    /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
+    /// <exception cref="RemoteConnectionNotFoundException">Thrown if the Guid provided is not found.</exception>
+    public string GetRemoteEndPoint(Guid guid)
+    {
+        if (!IsReady)
+        {
+            throw new ServerNotReadyException();
+        }
+
+        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection))
+        {
+            return remoteConnection.Client.RemoteEndPoint;
+        }
+        else
+        {
+            throw new RemoteConnectionNotFoundException();
+        }
+    }
+
+    /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     public List<Guid> GetStaleRemoteConnections()
     {

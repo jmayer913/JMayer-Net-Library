@@ -3,9 +3,9 @@
 namespace JMayer.Net;
 
 /// <summary>
-/// The interface has common events, properties and methods for a server communicating with a remote clients.
+/// The interface has common properties and methods for a server communicating with remote clients.
 /// </summary>
-public interface IServer
+public interface IServer : IDisposable
 {
     /// <summary>
     /// The property gets the number of remote connections the server has.
@@ -19,7 +19,7 @@ public interface IServer
 
     /// <summary>
     /// The property gets/sets the number of seconds of inactivity based on the connection
-    /// stale mode until the connection is considered stale and removed.
+    /// stale mode until the connection is considered stale.
     /// </summary>
     int ConnectionTimeout { get; set; }
 
@@ -32,7 +32,7 @@ public interface IServer
     /// The method accepts an incoming connection, if any exist.
     /// </summary>
     /// <param name="cancellationToken">A token used for task cancellations.</param>
-    /// <returns>The identifier for the remote connection.</returns>
+    /// <returns>The identifier for the remote connection or Guid.Empty if no connection was accepted.</returns>
     Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -45,6 +45,17 @@ public interface IServer
     /// The method disconnects all remote connections.
     /// </summary>
     void DisconnectAll();
+
+    /// <summary>
+    /// The method returns the remote end point for the remote connection.
+    /// </summary>
+    /// <param name="guid">The client to search for.</param>
+    /// <returns>The remote end point.</returns>
+    /// <remarks>
+    /// Instead of logging the guid, this can be called so logging can state
+    /// the remote ip and port the action occurred on.
+    /// </remarks>
+    string GetRemoteEndPoint(Guid guid);
 
     /// <summary>
     /// The method returns the stale remote connections.
@@ -83,9 +94,9 @@ public interface IServer
     /// <param name="cancellationToken">A token used for task cancellations.</param>
     /// <returns>A Task object for the async.</returns>
     /// <remarks>
-    /// The application will read new data from the server; returned as RemoteClientPDU objects
-    /// If the PDU requires a response, this method will be used the Guid from the RemoteClientPDU
-    /// will be provided.
+    /// The application will read new data from the server which is returned as RemotePDU objects.
+    /// If any PDU requires a response from the server, this method will be used and the Guid from 
+    /// the RemotePDU object will be provided.
     /// </remarks>
     Task SendToAsync(PDU pdu, Guid guid, CancellationToken cancellationToken = default);
 
@@ -97,9 +108,9 @@ public interface IServer
     /// <param name="cancellationToken">A token used for task cancellations.</param>
     /// <returns>A Task object for the async.</returns>
     /// <remarks>
-    /// The application will read new data from the server; returned as RemoteClientPDU objects
-    /// If the PDU requires a response, this method will be used the Guid from the RemoteClientPDU
-    /// will be provided.
+    /// The application will read new data from the server which is returned as RemotePDU objects.
+    /// If any PDU requires a response from the server, this method will be used and the Guid from 
+    /// the RemotePDU object will be provided.
     /// </remarks>
     Task SendToAsync(List<PDU> pdus, Guid guid, CancellationToken cancellationToken = default);
 
