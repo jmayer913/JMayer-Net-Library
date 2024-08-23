@@ -8,9 +8,6 @@ namespace JMayer.Net.ProtocolDataUnit;
 /// <remarks>
 /// Any subclass will need to define the byte order of the PDU using the ToBytes() method; the
 /// IClient/IServer will use this when sending the PDU.
-/// 
-/// Any subclass will need to define data validation using the Validate() method; the PDUParser
-/// will call this after the data has been parsed.
 /// </remarks>
 public abstract class PDU
 {
@@ -51,12 +48,14 @@ public abstract class PDU
     /// The method validates if the data in the PDU is correct.
     /// </summary>
     /// <returns>The result of the validation.</returns>
-    public abstract List<ValidationResult> Validate();
+    public virtual List<ValidationResult> Validate()
+    {
+        return ValidateDataAnnotations();
+    }
 
     /// <summary>
     /// The method validates the data annotations on the PDU.
     /// </summary>
-    /// <param name="dataObject">The data object to validate.</param>
     /// <returns>The validation results.</returns>
     protected List<ValidationResult> ValidateDataAnnotations()
     {

@@ -22,7 +22,7 @@ internal sealed class RemoteConnection
     /// Multiple threads can potentially access the variable so 
     /// access must be interlocked in the LastReceivedTimestamp property.
     /// </remarks>
-    private long _lastReceivedTimestamp;
+    private long _lastReceivedTimestamp = DateTime.Now.Ticks;
 
     /// <summary>
     /// The property gets/sets when the last message was received.
@@ -40,7 +40,7 @@ internal sealed class RemoteConnection
     /// Multiple threads can potentially access the variable so 
     /// access must be interlocked in the LastSentTimestamp property.
     /// </remarks>
-    private long _lastSentTimestamp;
+    private long _lastSentTimestamp = DateTime.Now.Ticks;
 
     /// <summary>
     /// The property gets/sets when the last message was sent.
@@ -59,6 +59,6 @@ internal sealed class RemoteConnection
     public RemoteConnection(IClient client) 
     {
         ArgumentNullException.ThrowIfNull(client);
-        Client = client; 
+        Client = client;
     }
 }

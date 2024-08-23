@@ -34,10 +34,4 @@ internal class StringPDU : JMayer.Net.ProtocolDataUnit.PDU
     {
         return Encoding.ASCII.GetBytes(String);
     }
-
-    /// <inheritdoc/>
-    public override List<ValidationResult> Validate()
-    {
-        return ValidateDataAnnotations();
-    }
 }
