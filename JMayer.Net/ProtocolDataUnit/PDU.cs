@@ -14,10 +14,7 @@ public abstract class PDU
     /// <summary>
     /// The property gets if the PDU data is valid.
     /// </summary>
-    public bool IsValid 
-    {
-        get => ValidationResults.Count == 0;
-    }
+    public bool IsValid => ValidationResults.Count == 0;
 
     /// <summary>
     /// The property gets/sets the number of times the protocl data unit was attempted to be sent.
@@ -48,10 +45,7 @@ public abstract class PDU
     /// The method validates if the data in the PDU is correct.
     /// </summary>
     /// <returns>The result of the validation.</returns>
-    public virtual List<ValidationResult> Validate()
-    {
-        return ValidateDataAnnotations();
-    }
+    public virtual List<ValidationResult> Validate() => ValidateDataAnnotations();
 
     /// <summary>
     /// The method validates the data annotations on the PDU.

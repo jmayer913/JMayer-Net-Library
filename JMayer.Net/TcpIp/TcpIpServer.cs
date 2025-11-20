@@ -31,10 +31,7 @@ public sealed class TcpIpServer : IServer
     private TcpListener? _tcpIpListener;
 
     /// <inheritdoc/>
-    public int ConnectionCount
-    {
-        get => _remoteConnections.Count;
-    }
+    public int ConnectionCount => _remoteConnections.Count;
 
     /// <inheritdoc/>
     public ConnectionStaleMode ConnectionStaleMode { get; set; }
@@ -43,10 +40,7 @@ public sealed class TcpIpServer : IServer
     public int ConnectionTimeout { get; set; }
 
     /// <inheritdoc/>
-    public bool IsReady
-    {
-        get => _isReady;
-    }
+    public bool IsReady => _isReady;
 
     /// <summary>
     /// The parser constructor.
@@ -63,26 +57,24 @@ public sealed class TcpIpServer : IServer
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     public async Task<Guid> AcceptIncomingConnectionAsync(CancellationToken cancellationToken = default)
     {
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
 
-        if (_tcpIpListener != null && _tcpIpListener.Pending())
-        {
-            TcpClient tcpClient = await _tcpIpListener.AcceptTcpClientAsync(cancellationToken);
-            RemoteConnection remoteTcpIpClientConnection = new(new TcpIpClient(_pduParser, tcpClient));
-            
-            //A new Guid is always created when a new connection is received and with the key being a Guid,
-            //it should always unique so we shouldn't need to check for TryAdd() failing.
-            _ = _remoteConnections.TryAdd(remoteTcpIpClientConnection.InternalId, remoteTcpIpClientConnection);
-            
-            return remoteTcpIpClientConnection.InternalId;
-        }
-        else
+        if (_tcpIpListener is null || _tcpIpListener.Pending() is false)
         {
             return Guid.Empty;
         }
+
+        TcpClient tcpClient = await _tcpIpListener.AcceptTcpClientAsync(cancellationToken);
+        RemoteConnection remoteTcpIpClientConnection = new(new TcpIpClient(_pduParser, tcpClient));
+
+        //A new Guid is always created when a new connection is received and with the key being a Guid,
+        //it should always be unique so we shouldn't need to check for TryAdd() failing.
+        _ = _remoteConnections.TryAdd(remoteTcpIpClientConnection.InternalId, remoteTcpIpClientConnection);
+
+        return remoteTcpIpClientConnection.InternalId;
     }
 
     /// <inheritdoc/>
@@ -90,27 +82,25 @@ public sealed class TcpIpServer : IServer
     /// <exception cref="RemoteConnectionNotFoundException">Thrown if the Guid provided is not found.</exception>
     public void Disconnect(Guid guid)
     {
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
 
-        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection))
-        {
-            _ = _remoteConnections.TryRemove(guid, out _);
-            remoteConnection.Client.Disconnect();
-        }
-        else
+        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection) is false)
         {
             throw new RemoteConnectionNotFoundException();
         }
+
+        _ = _remoteConnections.TryRemove(guid, out _);
+        remoteConnection.Client.Disconnect();
     }
 
     /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     public void DisconnectAll()
     {
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
@@ -128,36 +118,31 @@ public sealed class TcpIpServer : IServer
     }
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        Stop();
-    }
+    public void Dispose() => Stop();
 
     /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     /// <exception cref="RemoteConnectionNotFoundException">Thrown if the Guid provided is not found.</exception>
     public string GetRemoteEndPoint(Guid guid)
     {
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
 
-        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection))
-        {
-            return remoteConnection.Client.RemoteEndPoint;
-        }
-        else
+        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection) is false)
         {
             throw new RemoteConnectionNotFoundException();
         }
+
+        return remoteConnection.Client.RemoteEndPoint;
     }
 
     /// <inheritdoc/>
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     public List<Guid> GetStaleRemoteConnections()
     {
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
@@ -166,7 +151,7 @@ public sealed class TcpIpServer : IServer
 
         foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
         {
-            if (!remoteConnection.Client.IsConnected
+            if (remoteConnection.Client.IsConnected is false
                 || (ConnectionStaleMode == ConnectionStaleMode.LastReceived && DateTime.Now.Subtract(remoteConnection.LastReceivedTimestamp).TotalSeconds > ConnectionTimeout)
                 || (ConnectionStaleMode == ConnectionStaleMode.LastSent && DateTime.Now.Subtract(remoteConnection.LastSentTimestamp).TotalSeconds > ConnectionTimeout))
             {
@@ -181,7 +166,7 @@ public sealed class TcpIpServer : IServer
     /// <exception cref="ServerNotReadyException">Thrown if the Start() has not been called yet.</exception>
     public async Task<List<RemotePDU>> ReceiveAndParseAsync(CancellationToken cancellationToken = default)
     {
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
@@ -229,11 +214,14 @@ public sealed class TcpIpServer : IServer
     {
         ArgumentNullException.ThrowIfNull(pdus);
 
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
 
+        //Because we want to run all tasks at once and the remote connections are needed later to
+        //set the last sent timestamp, a tuple will be used to store the remote connection and the task for
+        //sending the PDUs.
         List<(RemoteConnection RemoteConnection, Task Task)> connectionTuples = [];
 
         foreach (RemoteConnection remoteConnection in _remoteConnections.Values)
@@ -267,20 +255,18 @@ public sealed class TcpIpServer : IServer
     {
         ArgumentNullException.ThrowIfNull(pdus);
 
-        if (!IsReady)
+        if (IsReady is false)
         {
             throw new ServerNotReadyException();
         }
 
-        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection))
-        {
-            await remoteConnection.Client.SendAsync(pdus, cancellationToken);
-            remoteConnection.LastSentTimestamp = DateTime.Now;
-        }
-        else
+        if (_remoteConnections.TryGetValue(guid, out RemoteConnection? remoteConnection) is false)
         {
             throw new RemoteConnectionNotFoundException();
         }
+
+        await remoteConnection.Client.SendAsync(pdus, cancellationToken);
+        remoteConnection.LastSentTimestamp = DateTime.Now;
     }
 
     /// <inheritdoc/>
@@ -292,7 +278,7 @@ public sealed class TcpIpServer : IServer
             throw new ArgumentException($"The {nameof(port)} parameter must be between 1 and {ushort.MaxValue}.", nameof(port));
         }
 
-        if (_tcpIpListener != null)
+        if (_tcpIpListener is not null)
         {
             try
             {
