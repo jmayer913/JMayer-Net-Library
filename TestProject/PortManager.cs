@@ -13,7 +13,7 @@ internal class PortManager
     /// <summary>
     /// Used to lock the index.
     /// </summary>
-    private readonly object _indexLock = new();
+    private readonly Lock _indexLock = new();
 
     /// <summary>
     /// The constant for the base port.
