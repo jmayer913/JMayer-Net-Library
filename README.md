@@ -1,5 +1,5 @@
 # Network Library
-This library will help you define the network protocol used by your application when it needs to communicate with a client or server using low level network communication (TCP/IP only). The library provides a universal client and/or server your application will use and you just need to define the protocol data units and how those are parsed.
+This library will help you define the network protocol used by your application when it needs to communicate with a client or server using low level network communication (TCP/IP only). The library provides a universal client and/or server your application will use and you just need to define the protocol data units, how they are sent and how they are parsed.
 
 ## Protocol Data Unit
 A Protocol Data Unit is used to represent the unit of data sent or received over the network. For example, your application is sending/receiving text only messages and the messages will always end with the new line characters (\r\n). Using the library, you would define a TextOnlyMessagePDU object as such:
