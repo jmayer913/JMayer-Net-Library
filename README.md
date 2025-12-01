@@ -49,7 +49,8 @@ public class TextOnlyMessagePDUParser : PDUParser
         int lengthOfMessage = index - totalBytesProcessed;
         string parsedMessage = asciiCharacters.Substring(totalBytesProcessed, lengthOfMessage);
 
-        //Include the new line in the total bytes processed so its not found again on the next loop.
+        //Update the number of bytes processed so a new message can be found on the next loop.
+        //Also create the PDU object and add it to the list that will be passed to the PDUParserResult object.
         totalBytesProcessed += lengthOfMessage + Environment.NewLine.Length;
         pdus.Add(new TextOnlyMessagePDU() { TextOnlyMessage = parsedMessage });
     }
