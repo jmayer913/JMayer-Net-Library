@@ -2,29 +2,29 @@
 This library will help you define the network protocol used by your application when it needs to communicate with a client or server using low level network communication (TCP/IP only). The library provides a universal client and/or server your application will use and you just need to define the protocol data units, how they are sent and how they are parsed.
 
 ## Protocol Data Unit
-A Protocol Data Unit is used to represent the unit of data sent or received over the network. For example, your application is sending/receiving text only messages and the messages will always end with the new line characters (\r\n). Using the library, you would define a TextOnlyMessagePDU object as such:
+A Protocol Data Unit is used to represent the unit of data sent or received over the network. For example, your application is sending/receiving text only messages and the messages will always end with the new line characters (\r\n). Using the library, you would define a TextPDU object as such:
 ```
-public class TextOnlyMessagePDU : PDU
+public class TextPDU : PDU
 {
   //You will define any header information and data contained in the PDU.
   //Some protocols use a header to describe the data sent; this only has data.
   [Required]
-  public string TextOnlyMessage { get; set; }
+  public string Text { get; set; }
 
   //You will also need to define the byte order of the PDU.
   //The universal client/server will use this when sending the PDU over the network.
   public override byte[] ToBytes()
   {
-    return Encoding.ASCII.GetBytes($"{TextOnlyMessage}{Environment.NewLine});
+    return Encoding.ASCII.GetBytes($"{Text}{Environment.NewLine});
   }
 }
 ```
-The library is built on the idea you create a class which represents the protocol data units used in the network protocol and it inherits from the library's PDU base class.
+The library is built on the idea you create the class(es) which represents the protocol data unit(s) used in the network protocol and it inherits from the library's PDU base class.
 
 ## Protocol Data Unit Parser
-A Protocol Data Unit Parser is used to defined how bytes remotely received are parsed into protocol data units. For exmple, your TextOnlyMessagePDU now needs a parser. Using the library, you would define a TextOnlyMessagePDUParser object as such:
+A Protocol Data Unit Parser is used to defined how bytes remotely received are parsed into protocol data units. For exmple, your TextPDU now needs a parser. Using the library, you would define a TextPDUParser object as such:
 ```
-public class TextOnlyMessagePDUParser : PDUParser
+public class TextPDUParser : PDUParser
 {
   //You will need to define how bytes are turned into protocol data units.
   //The universal client/server will use this when it receives bytes over the network.
@@ -52,7 +52,7 @@ public class TextOnlyMessagePDUParser : PDUParser
         //Update the number of bytes processed so a new message can be found on the next loop.
         //Also create the PDU object and add it to the list that will be passed to the PDUParserResult object.
         totalBytesProcessed += lengthOfMessage + Environment.NewLine.Length;
-        pdus.Add(new TextOnlyMessagePDU() { TextOnlyMessage = parsedMessage });
+        pdus.Add(new TextPDU() { Text = parsedMessage });
     }
     while (totalBytesProcessed < bytes.Length);
 
@@ -71,16 +71,16 @@ The library comes with a universal TCP/IP client; it's universal in the sense it
 ### How to Initialize and Connect to a Server
 ```
 //A parser must be provided on creation.
-TcpIpClient client = new(new TextOnlyMessagePDUParser());
+TcpIpClient client = new(new TextPDUParser());
 await client.ConnectAsync("127.0.0.1", 4555);
 ```
 This will initialize your client and have it connect to a specific domain name or IP address and a specific port.
 
 ### How to Send Data to a Server
 ```
-await client.SendAsync(new TextOnlyMessagePDU() { TextOnlyMessage = "Hello!" });
+await client.SendAsync(new TextPDU() { Text = "Hello!" });
 //or
-await client.SendAsync([new TextOnlyMessagePDU() { TextOnlyMessage = "Hello!" }, new TextOnlyMessagePDU() { TextOnlyMessage = "How are you?" }]);
+await client.SendAsync([new TextPDU() { Text = "Hello!" }, new TextPDU() { Text = "How are you?" }]);
 ```
 This will allow you to to send a PDU(s) to the server.
 
@@ -88,7 +88,7 @@ This will allow you to to send a PDU(s) to the server.
 ```
 var pdus = await client.ReceiveAndParseAsync();
 
-foreach (var pdu in pdus.Cast<TextOnlyMessagePDU>())
+foreach (var pdu in pdus.Cast<TextPDU>())
 {
   if (pdu.IsValid)
   {
@@ -108,7 +108,7 @@ The library comes with a universal TCP/IP server; it's universal in the sense it
 ### How to Initialize and Start Your Server
 ```
 //A parser must be provided on creation.
-TcpIpServer server = new(new TextOnlyMessagePDUParser());
+TcpIpServer server = new(new TextPDUParser());
 server.Start(4555);
 ```
 This will initialize your server and have it start listening for incoming connections on the specified port. Please note, TCP/IP only allows 1 application to listen on a port so make sure the port isn't already being used.
@@ -126,15 +126,15 @@ This will allow you to accept an incoming connection. Because a connection can h
 
 ### How to Send Data to the Client(s)
 ```
-await server.SendToAllAsync(new TextOnlyMessagePDU() { TextOnlyMessage = "Hello!" });
+await server.SendToAllAsync(new TextPDU() { Text = "Hello!" });
 //or
-await server.SendToAllAsync([new TextOnlyMessagePDU() { TextOnlyMessage = "Hello!" }, new TextOnlyMessagePDU() { TextOnlyMessage = "How are you?" }]);
+await server.SendToAllAsync([new TextPDU() { Text = "Hello!" }, new TextPDU() { Text = "How are you?" }]);
 //or
-await server.SendToAsync(new TextOnlyMessagePDU() { TextOnlyMessage = "Hello!" }, connectionIdentifier);
+await server.SendToAsync(new TextPDU() { Text = "Hello!" }, connectionIdentifier);
 //or
-await server.SendToAsync([new TextOnlyMessagePDU() { TextOnlyMessage = "Hello!" }, new TextOnlyMessagePDU() { TextOnlyMessage = "How are you?" }], connectionIdentifier);
+await server.SendToAsync([new TextPDU() { Text = "Hello!" }, new TextPDU() { Text = "How are you?" }], connectionIdentifier);
 ```
-This will allow you to either send a PDU(s) to all the clients connected to the server or send to a specific client using the connection identifier.
+This will allow you to either send PDU(s) to all the clients connected to the server or send to a specific client using the connection identifier.
 
 ### How to Receive Data Sent from the Client(s)
 ```
@@ -144,7 +144,7 @@ foreach (var remotePDU in remotePDUs)
 {
   if (remotePDU.PDU.IsValid)
   {
-    await server.SendToAsync(new TextOnlyMessagePDU() { TextOnlyMessage = "Some response back to the client that sent this." }, remotePDU.Guid);
+    await server.SendToAsync(new TextPDU() { Text = "Some response back to the client that sent this." }, remotePDU.Guid);
   }
   else
   {
@@ -166,7 +166,7 @@ This will allow you to disconnect a specific client or disconnect all the client
 ```
 //When you initialize your server, you can define how the server
 //identifies stale remote connections.
-TcpIpServer server = new(new TextOnlyMessagePDUParser())
+TcpIpServer server = new(new TextPDUParser())
 {
   ConnectionTimeout = 60, //In seconds, how long of inactivity before a connection is considered stale.
   ConnectionStaleMode = ConnectionStaleMode.None //Default.
