@@ -55,11 +55,11 @@ public class TcpIpUnitTest
     /// when an invalid port is passed to the TcpIpClient.ConnectionAsync().
     /// </summary>
     [Fact]
-    public void VerifyClientConnectThrowsArgumentException()
+    public async Task VerifyClientConnectThrowsArgumentException()
     {
-        Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(null, PortManager.BasePort));
-        Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(string.Empty, PortManager.BasePort));
-        Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(LocalIpAddress, 0));
+        await Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(null, PortManager.BasePort));
+        await Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(string.Empty, PortManager.BasePort));
+        await Assert.ThrowsAnyAsync<ArgumentException>(() => new TcpIpClient(new StringPDUParser()).ConnectAsync(LocalIpAddress, 0));
     }
 
     /// <summary>
@@ -169,23 +169,23 @@ public class TcpIpUnitTest
     /// The method verifies a not connected exception is thrown if TcpIpClient.ReceiveAndParseAsync() is called and the client is not connected.
     /// </summary>
     [Fact]
-    public void VerifyClientReceiveAndParseThrowsNotConnectedException() => Assert.ThrowsAnyAsync<NotConnectedException>(() => new TcpIpClient(new StringPDUParser()).ReceiveAndParseAsync());
+    public async Task VerifyClientReceiveAndParseThrowsNotConnectedException() => await Assert.ThrowsAnyAsync<NotConnectedException>(() => new TcpIpClient(new StringPDUParser()).ReceiveAndParseAsync());
 
     /// <summary>
     /// The method verifies an argument exception is thrown when a null is passed to the TcpIpClient.SendAsync().
     /// </summary>
     [Fact]
-    public void VerifyClientSendThrowsArgumentNullException()
+    public async Task VerifyClientSendThrowsArgumentNullException()
     {
-        Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpClient(new StringPDUParser()).SendAsync((JMayer.Net.ProtocolDataUnit.PDU)null));
-        Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpClient(new StringPDUParser()).SendAsync((List<JMayer.Net.ProtocolDataUnit.PDU>)null));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpClient(new StringPDUParser()).SendAsync((JMayer.Net.ProtocolDataUnit.PDU)null));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpClient(new StringPDUParser()).SendAsync((List<JMayer.Net.ProtocolDataUnit.PDU>)null));
     }
 
     /// <summary>
     /// The method verifies a not connected exception is thrown if TcpIpClient.ReceiveAndParseAsync() is called and the client is not connected.
     /// </summary>
     [Fact]
-    public void VerifyClientSendThrowsNotConnectedException() => Assert.ThrowsAnyAsync<NotConnectedException>(() => new TcpIpClient(new StringPDUParser()).SendAsync(new StringPDU()));
+    public async Task VerifyClientSendThrowsNotConnectedException() => await Assert.ThrowsAnyAsync<NotConnectedException>(() => new TcpIpClient(new StringPDUParser()).SendAsync(new StringPDU()));
 
     /// <summary>
     /// The method launches a thread that accepts remote connections for the server.
@@ -275,7 +275,7 @@ public class TcpIpUnitTest
     /// The method verifies a server not ready exception is thrown if TcpIpServer.AcceptIncomingConnectionAsync() is called and the server has not been started.
     /// </summary>
     [Fact]
-    public void VerifyServerAcceptIncomingConnectionThrowsServerNotReadyException() => Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).AcceptIncomingConnectionAsync());
+    public async Task VerifyServerAcceptIncomingConnectionThrowsServerNotReadyException() => await Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).AcceptIncomingConnectionAsync());
 
     /// <summary>
     /// The method verifies an argument exception is thrown when a null is passed to the TcpIpServer constructor().
@@ -422,7 +422,7 @@ public class TcpIpUnitTest
     /// The method verifies a server not ready exception is thrown if TcpIpServer.ReceiveAndParseAsync() is called and the server has not been started.
     /// </summary>
     [Fact]
-    public void VerifyServerReceiveAndParseThrowsServerNotReadyException() => Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).ReceiveAndParseAsync());
+    public async Task VerifyServerReceiveAndParseThrowsServerNotReadyException() => await Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).ReceiveAndParseAsync());
 
     /// <summary>
     /// The method verifies when a client sends a message the server will response back to the client with a message.
@@ -516,37 +516,37 @@ public class TcpIpUnitTest
     /// The method verifies an argument exception is thrown when a null is passed to the TcpIpServer.SendToAllAsync().
     /// </summary>
     [Fact]
-    public void VerifyServerSendToAllThrowsArgumentNullException()
+    public async Task VerifyServerSendToAllThrowsArgumentNullException()
     {
-        Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAllAsync((JMayer.Net.ProtocolDataUnit.PDU)null));
-        Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAllAsync((List<JMayer.Net.ProtocolDataUnit.PDU>)null));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAllAsync((JMayer.Net.ProtocolDataUnit.PDU)null));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAllAsync((List<JMayer.Net.ProtocolDataUnit.PDU>)null));
     }
 
     /// <summary>
     /// The method verifies a server not ready exception is thrown if TcpIpServer.SendToAllAsync() is called and the server has not been started.
     /// </summary>
     [Fact]
-    public void VerifyServerSendToAllThrowsServerNotReadyException() => Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).SendToAllAsync(new StringPDU()));
+    public async Task VerifyServerSendToAllThrowsServerNotReadyException() => await Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).SendToAllAsync(new StringPDU()));
 
     /// <summary>
     /// The method verifies an argument exception is thrown when a null is passed to the TcpIpServer.SendToAsync().
     /// </summary>
     [Fact]
-    public void VerifyServerSendToThrowsArgumentNullException()
+    public async Task VerifyServerSendToThrowsArgumentNullException()
     {
-        Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAsync((JMayer.Net.ProtocolDataUnit.PDU)null, Guid.NewGuid()));
-        Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAsync((List<JMayer.Net.ProtocolDataUnit.PDU>)null, Guid.NewGuid()));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAsync((JMayer.Net.ProtocolDataUnit.PDU)null, Guid.NewGuid()));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => new TcpIpServer(new StringPDUParser()).SendToAsync((List<JMayer.Net.ProtocolDataUnit.PDU>)null, Guid.NewGuid()));
     }
 
     /// <summary>
     /// The method verifies a remote connection not found exception is thrown if TcpIpServer.SendToAsync() is called and the GUID is not found.
     /// </summary>
     [Fact]
-    public void VerifyServerSendToThrowsRemoteConnectionNotFoundException()
+    public async Task VerifyServerSendToThrowsRemoteConnectionNotFoundException()
     {
         TcpIpServer server = new(new StringPDUParser());
         server.Start(PortManager.Instance.GetNextAvailablePort());
-        Assert.ThrowsAnyAsync<RemoteConnectionNotFoundException>(() => server.SendToAsync(new StringPDU(), Guid.NewGuid()));
+        await Assert.ThrowsAnyAsync<RemoteConnectionNotFoundException>(() => server.SendToAsync(new StringPDU(), Guid.NewGuid()));
         server.Stop();
     }
 
@@ -554,7 +554,7 @@ public class TcpIpUnitTest
     /// The method verifies a server not ready exception is thrown if TcpIpServer.SendToAsync() is called and the server has not been started.
     /// </summary>
     [Fact]
-    public void VerifyServerSendToThrowsServerNotReadyException() => Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).SendToAsync(new StringPDU(), Guid.NewGuid()));
+    public async Task VerifyServerSendToThrowsServerNotReadyException() => await Assert.ThrowsAnyAsync<ServerNotReadyException>(() => new TcpIpServer(new StringPDUParser()).SendToAsync(new StringPDU(), Guid.NewGuid()));
 
     /// <summary>
     /// The method verifies the server can send one message to all the clients.
