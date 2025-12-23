@@ -19,16 +19,10 @@ public sealed class TcpIpClient : IClient
     private TcpClient? _tcpIpClient;
 
     /// <inheritdoc/>>
-    public bool IsConnected
-    {
-        get => _tcpIpClient != null && _tcpIpClient.Connected;
-    }
+    public bool IsConnected => _tcpIpClient is not null && _tcpIpClient.Connected;
 
     /// <inheritdoc/>
-    public string RemoteEndPoint
-    {
-        get => _tcpIpClient?.Client?.RemoteEndPoint?.ToString() ?? string.Empty;
-    }
+    public string RemoteEndPoint => _tcpIpClient?.Client?.RemoteEndPoint?.ToString() ?? string.Empty;
 
     /// <summary>
     /// The parser constructor.
@@ -70,7 +64,7 @@ public sealed class TcpIpClient : IClient
             throw new ArgumentException($"The {nameof(port)} parameter must be between 1 and {ushort.MaxValue}.", nameof(port));
         }
 
-        if (_tcpIpClient != null)
+        if (_tcpIpClient is not null)
         {
             try
             {
@@ -92,31 +86,26 @@ public sealed class TcpIpClient : IClient
     }
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        Disconnect();
-    }
+    public void Dispose() => Disconnect();
 
     /// <inheritdoc/>
     /// <exception cref="NotConnectedException">Thrown if the client is not connected.</exception>
     public async Task<List<PDU>> ReceiveAndParseAsync(CancellationToken cancellationToken = default)
     {
-        if (!IsConnected)
+        if (IsConnected is false)
         {
             throw new NotConnectedException();
         }
 
-        if (_tcpIpClient != null && _tcpIpClient.Available > 0)
-        {
-            byte[] bytes = new byte[_tcpIpClient.Available];
-            _ = await _tcpIpClient.GetStream().ReadAsync(bytes.AsMemory(), cancellationToken);
-            PDUParserResult pduParserResult = _pduParser.Parse(bytes);
-            return pduParserResult.PDUs;
-        }
-        else
+        if (_tcpIpClient is null || _tcpIpClient.Available is 0)
         {
             return [];
         }
+
+        byte[] bytes = new byte[_tcpIpClient.Available];
+        _ = await _tcpIpClient.GetStream().ReadAsync(bytes.AsMemory(), cancellationToken);
+        PDUParserResult pduParserResult = _pduParser.Parse(bytes);
+        return pduParserResult.PDUs;
     }
 
     /// <inheritdoc/>
@@ -135,25 +124,27 @@ public sealed class TcpIpClient : IClient
     {
         ArgumentNullException.ThrowIfNull(pdus);
 
-        if (!IsConnected)
+        if (IsConnected is false)
         {
             throw new NotConnectedException();
         }
 
-        if (_tcpIpClient != null) 
+        if (_tcpIpClient is null)
         {
-            int index = 0;
-            byte[] bytes = [];
-
-            foreach (PDU pdu in pdus)
-            {
-                byte[] pduBytes = pdu.ToBytes();
-                Array.Resize(ref bytes, bytes.Length + pduBytes.Length);
-                Array.Copy(pduBytes, 0, bytes, index, pduBytes.Length);
-                index += pduBytes.Length;
-            }
-
-            await _tcpIpClient.GetStream().WriteAsync(bytes.AsMemory(), cancellationToken);
+            return;
         }
+
+        int index = 0;
+        byte[] bytes = [];
+
+        foreach (PDU pdu in pdus)
+        {
+            byte[] pduBytes = pdu.ToBytes();
+            Array.Resize(ref bytes, bytes.Length + pduBytes.Length);
+            Array.Copy(pduBytes, 0, bytes, index, pduBytes.Length);
+            index += pduBytes.Length;
+        }
+
+        await _tcpIpClient.GetStream().WriteAsync(bytes.AsMemory(), cancellationToken);
     }
 }

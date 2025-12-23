@@ -20,7 +20,7 @@ internal class StringPDUParser : PDUParser
             int index = bytesAsString.IndexOf(Environment.NewLine, totalBytesProcessed);
 
             //Break the loop if the new line isn't found; partial data sent.
-            if (index == -1)
+            if (index is -1)
             {
                 break;
             }

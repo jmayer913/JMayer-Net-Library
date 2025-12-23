@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <Authors>jmayer913</Authors>
@@ -9,8 +9,17 @@
     <PackageDescription>Package contains network communication (TCP/IP Only).</PackageDescription>
     <RepositoryUrl>https://github.com/jmayer913/JMayer-Net-Library</RepositoryUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>8.0.0</Version>
+    <Version>9.0.0</Version>
+    <Description></Description>
     <PackageTags>library;net-core;tcp-ip;tcp-client;tcp-server</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\JMayer-Data-Library\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>

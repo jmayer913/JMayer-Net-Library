@@ -18,10 +18,7 @@ public abstract class PDUParser
     /// <summary>
     /// The property gets the total bytes buffered by the parser.
     /// </summary>
-    public int TotalBytesBuffered
-    {
-        get => _buffer.Length;
-    }
+    public int TotalBytesBuffered => _buffer.Length;
 
     /// <summary>
     /// The method attempts to parse the bytes into PDUs.
